@@ -33,15 +33,9 @@ def johnson(m):
                         if visited and matrix[1][j] <= matrix[0][visited[-1]]:
                             min_val = matrix[i][j]
                             pos = (i, j)
-                        elif not visited:
-                            min_val = matrix[i][j]
-                            pos = (i, j)
                     else:
                         # Dla wiersza 1: sprawdzamy, czy poprzednie zadanie na pierwszej maszynie jest mniejsze niż obecne
                         if visited and matrix[0][j] <= matrix[1][visited[0]]:
-                            min_val = matrix[i][j]
-                            pos = (i, j)
-                        elif not visited:
                             min_val = matrix[i][j]
                             pos = (i, j)
                 elif matrix[i][j] < min_val and j not in visited:
