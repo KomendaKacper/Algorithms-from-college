@@ -1,4 +1,5 @@
-def plecak(W, wagi, wartosci, n):
+def plecak(W, wagi, wartosci):
+    n = len(wartosci)     
     # Inicjalizacja tablicy K z wartościami zerowymi
     K = [[0 for x in range(W + 1)] for x in range(n + 1)]
     
@@ -15,13 +16,22 @@ def plecak(W, wagi, wartosci, n):
             else:
                 K[i][w] = K[i-1][w]
 
-    return K[n][W]
+    return K, K[n][W]
 
-# Przykładowe dane wejściowe
-wartosci = [60, 100, 120, 200, 300, 400, 150, 180, 220, 250]  # Wartości przedmiotów
-wagi = [10, 20, 30, 25, 15, 35, 40, 22, 18, 29]                # Wagi przedmiotów
-W = 100                                                       # Pojemność plecaka
-n = len(wartosci)                                             # Liczba przedmiotów
+wartosci = [10,15,40]
+wagi = [1,2,3]
+W = 6      # Pojemność plecaka
 
 # Wyświetlenie maksymalnego możliwego zysku
-print(plecak(W, wagi, wartosci, n))
+matrix, res = plecak(W, wagi, wartosci)
+
+print("Macierz decyzji optymalnych:")
+for e in matrix:
+    print(e)
+
+print("\nWartość funkcji dla każdego etapu i rozważanego stanu:")
+for i, row in enumerate(matrix):
+    for j, val in enumerate(row):
+        print(f"K[{i}][{j}] = {val}")
+
+print("\nMaksymalny możliwy zysk:", res)
