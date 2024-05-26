@@ -1,3 +1,6 @@
+from collections import deque
+
+
 class Edge:
     def __init__(self, capacity, is_residual=False):
         self.capacity = capacity
@@ -6,7 +9,7 @@ class Edge:
         self.is_residual = is_residual
 
     def __repr__(self):
-        return f"Pojemność: {self.capacity} Przepływ rzeczywisty: {self.flow} Przepływ resztowy: {self.residual} Krawędź rzeczywista: {self.is_residual}"
+        return f"Pojemność: {self.capacity} Przepływ rzeczywisty: {self.flow} Przepływ resztowy: {self.residual} Krawędź resztowa: {self.is_residual}"
 
 class Graph:
     def __init__(self, size):
@@ -37,48 +40,70 @@ class Graph:
                 neighbours_with_weights.append((i, edge.capacity))
         return neighbours_with_weights
 
-    def dfs(self, s, t, visited=None, path=None):
-        if visited is None:
-            visited = [False] * self.size
-        if path is None:
-            path = []
+    def bfs(self, s, t):
+        visited = [False] * self.size
+        parent = [-1] * self.size
+        queue = deque()
 
         visited[s] = True
-        path.append(s)
+        queue.append(s)
 
-        if s == t:
-            return path
+        while queue:
+            u = queue.popleft()
 
-        for ind, edge in enumerate(self.adj_matrix[s]):
-            if edge and not visited[ind] and edge.residual > 0:
-                result_path = self.dfs(ind, t, visited, path.copy())
-                if result_path:
-                    return result_path
+            for v, edge_capacity in self.neighbours(u):
+                if not visited[v] and self.adj_matrix[u][v].residual > 0:
+                    visited[v] = True
+                    parent[v] = u
+                    queue.append(v)
 
-        return None
+        return parent
+    
+    def find_path_flow(self, parent):
+        current_vertex = self.size - 1
+        min_residual_flow = float("inf")
+
+        if parent[current_vertex] == -1:
+            return 0
+        
+        while current_vertex != 0:
+            u = parent[current_vertex]
+            v = current_vertex
+            residual_flow = self.adj_matrix[u][v].residual
+            min_residual_flow = min(min_residual_flow, residual_flow)
+            current_vertex = u
+
+        return min_residual_flow
+
+
+    def augment_path(self, parent, t, min_flow):
+        current_vertex = t
+        while parent[current_vertex] != -1:
+            u = parent[current_vertex]
+            v = current_vertex
+            edge = self.adj_matrix[u][v]
+            if not edge.is_residual:
+                edge.flow += min_flow
+                edge.residual -= min_flow
+                reverse_edge = self.adj_matrix[v][u]
+                reverse_edge.residual += min_flow
+            else:
+                edge.residual -= min_flow
+                reverse_edge = self.adj_matrix[v][u]
+                reverse_edge.flow -= min_flow
+            current_vertex = u
 
     def fordFulkerson(self, s, t):
+        parent = self.bfs(s, t)
         max_flow = 0
-        path = self.dfs(s, t)
-        while path:
-            path_flow = float("Inf")
-            for i in range(len(path) - 1):
-                u, v = path[i], path[i + 1]
-                path_flow = min(path_flow, self.adj_matrix[u][v].residual)
-
-            for i in range(len(path) - 1):
-                u, v = path[i], path[i + 1]
-                self.adj_matrix[u][v].residual -= path_flow
-                self.adj_matrix[v][u].residual += path_flow
-                self.adj_matrix[u][v].flow += path_flow
-
+        while parent[t] != -1:
+            path_flow = self.find_path_flow(parent)
+            self.augment_path(parent, t, path_flow)
             max_flow += path_flow
-            path_names = [self.vertex_data[node] for node in path]
-            print("Ścieżka:", " -> ".join(path_names), ", Przepływ:", path_flow)
-            path = self.dfs(s, t)
+            parent = self.bfs(s, t)
         return max_flow
 
-
+    
 def printGraph(g):
     print("------GRAPH------")
     for v in g.vertices():
@@ -131,11 +156,11 @@ print("Maksymalny przepływ: %d" % g1.fordFulkerson(s, t))
 printGraph(g1)
 print ()
 
-graf_2 = [('s', 'a', 3), ('s', 'c', 3), ('a', 'b', 4), ('b', 's', 3), ('b', 'c', 1), ('b', 'd', 2), ('c', 'e', 6),
-          ('c', 'd', 2), ('d', 't', 1), ('e', 't', 9)]
+graf_2 = [ ('s', 'a', 3), ('s', 'c', 3), ('a', 'b', 4), ('b', 's', 3), ('b', 'c', 1), ('b', 'd', 2), ('c', 'e', 6), ('c', 'd', 2), ('d', 't', 1), ('e', 't', 9)]
+
 g2 = Graph(7)
 
-vertex_names_g2 = ['s', 'a', 'b', 'c', 'd', 't', 'e']
+vertex_names_g2 = ['s', 'a', 'b', 'c', 'd', 'e', 't']
 for i, name in enumerate(vertex_names_g2):
     g2.add_vertex_data(i, name)
 

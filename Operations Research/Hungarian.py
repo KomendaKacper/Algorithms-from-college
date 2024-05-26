@@ -1,38 +1,4 @@
 import numpy as np
-def metoda_wegierska(koszty):
-    #1: Redukcja całkowita
-    koszty = redukcja_calkowita(koszty)
-    print (koszty)
-    #2: Inicjalizacja
-    n = len(koszty)
-    count_zero_lines = 0
-
-    #3: Wykonanie iteracji, dopóki nie zostaną wybrane wszystkie elementy
-    while count_zero_lines < n:
-        zaznaczone_wiersze, zaznaczone_kolumny = wykreslanie_zer_min_linii(koszty)
-        print (zaznaczone_wiersze)
-        print (zaznaczone_kolumny)
-        count_zero_lines = len(zaznaczone_wiersze) + len(zaznaczone_kolumny)
-
-        if count_zero_lines < n:
-            koszty = adjust_matrix()
-        else:
-            rozwiazanie = znajdz_zerowy_element(koszty)
-    return rozwiazanie
-
-# def wykreslanie_zer_min_linii()
-
-def redukcja_calkowita(matrix):
-    # Zmniejszenie macierzy szukając najmniejszej wartości w wierszu nastepnie w kolumnie
-    # Zmniejszenie wiersza
-    row_mins = matrix.min(axis=1)
-    row_reduced = matrix - row_mins.reshape(-1, 1)
-
-    # Obrót macierzy i redukcja kolumn
-    col_mins = row_reduced.min(axis=0)
-    col_reduced = row_reduced - col_mins
-
-    return col_reduced
 
 def znajdz_zerowy_element(zero_mat):
     mark_zero = []
@@ -55,7 +21,7 @@ def znajdz_zerowy_element(zero_mat):
             zero_mat[:, zero_index] = True
         else:
             break  # Jeśli nie ma już zer do wyznaczenia, przerywamy pętlę
-
+        
     return mark_zero
 
 def adjust_matrix(mat, cover_rows, cover_cols):
@@ -85,24 +51,21 @@ def adjust_matrix(mat, cover_rows, cover_cols):
 
     return cur_mat
 
-koszty = np.array([
-    [4,6,6,5,10,6],[7,13,10,9,15,12],[7,13,13,13,8,12],[0,10,6,8,5,6],[7,4,8,15,13,11],[3,3,4,4,4,5]
-])
+# Przykładowa macierz
+mat = np.array([[0,0,0,1], [3,0,4,1], [9,4,0,0], [1,0,1,7]])
 
-print ("Macierz kosztów przed przekształceniem:")
-print (koszty)
+# Przykładowe zaznaczone wiersze i kolumny
+cover_rows = [0, 2]
+cover_cols = [1]
 
-rozwiazanie = redukcja_calkowita(koszty)
-print("Macierz kosztów po redukcji: ")
-print (rozwiazanie)
+print("Macierz początkowa:")
+print(mat)
 
-koszty_przed_adjust = rozwiazanie
-rows = [0,2,4,5]
-cols = [0]
-koszty_po_adjust = (adjust_matrix(koszty_przed_adjust,rows, cols))
-print("Macierz po dodaniu zera niezależnego: ")
-print (koszty_po_adjust)
+# Dostosowujemy macierz do wyznaczonych zer niezależnych
+adjusted_mat = adjust_matrix(mat, cover_rows, cover_cols)
+print("\nMacierz po dostosowaniu liczby zer niezależnych:")
+print(adjusted_mat)
 
-print ("Zera niezależne:")
-zera = znajdz_zerowy_element(koszty_po_adjust)
-print (zera)
+# Wyznaczamy i wypisujemy pozycje zer niezależnych
+print("\nWiersze i kolumny zer niezależnych:")
+print(znajdz_zerowy_element(adjusted_mat))

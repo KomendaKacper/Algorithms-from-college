@@ -1,8 +1,8 @@
 def plecak(W, wagi, wartosci):
-    n = len(wartosci)     
-    # Inicjalizacja tablicy K z wartościami zerowymi
+    n = len(wartosci)
+    # Inicjalizacja tablicy K zerami
     K = [[0 for x in range(W + 1)] for x in range(n + 1)]
-    
+
     # Wypełnianie tablicy K algorytmem dynamicznym
     for i in range(n + 1):
         for w in range(W + 1):
@@ -12,26 +12,32 @@ def plecak(W, wagi, wartosci):
             # Jeśli waga aktualnego przedmiotu jest mniejsza lub równa pozostałej pojemności, rozważ jego dodanie lub pominięcie
             elif wagi[i-1] <= w:
                 K[i][w] = max(wartosci[i-1] + K[i-1][w-wagi[i-1]], K[i-1][w])
-            # Jeśli waga aktualnego przedmiotu jest większa niż pozostała pojemność, pominię przedmiot
+            # Jeśli waga aktualnego przedmiotu jest większa niż pozostała pojemność, należy pominąć przedmiot
             else:
                 K[i][w] = K[i-1][w]
 
-    return K, K[n][W]
+    # Wyznaczanie wybranych przedmiotów
+    wybrane_przedmioty = []
+    i, j = n, W
+    while i > 0 and j > 0:
+        if K[i][j] != K[i - 1][j]:
+            wybrane_przedmioty.append(i-1)
+            j -= wagi[i - 1]
+        i -= 1
 
-wartosci = [10,15,40]
-wagi = [1,2,3]
-W = 6      # Pojemność plecaka
+    return K, K[n][W], wybrane_przedmioty
 
-# Wyświetlenie maksymalnego możliwego zysku
-matrix, res = plecak(W, wagi, wartosci)
+wartosci = [2,2,4,5,3,6,2,4,6,2]
+wagi = [3,1,3,4,2,4,2,1,4,6]
+W = 10 
+
+matrix, res, items = plecak(W, wagi, wartosci)
 
 print("Macierz decyzji optymalnych:")
 for e in matrix:
     print(e)
 
-print("\nWartość funkcji dla każdego etapu i rozważanego stanu:")
-for i, row in enumerate(matrix):
-    for j, val in enumerate(row):
-        print(f"K[{i}][{j}] = {val}")
-
 print("\nMaksymalny możliwy zysk:", res)
+print("Przedmioty wybrane do plecaka:")
+for idx in items:
+    print(f"Przedmiot {idx+1} (wartość: {wartosci[idx]}, waga: {wagi[idx]})")
